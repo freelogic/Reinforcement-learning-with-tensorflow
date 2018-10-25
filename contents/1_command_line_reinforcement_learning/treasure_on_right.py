@@ -176,5 +176,7 @@ if __name__ == "__main__":
         print('\r\n')
 
 # TODO 增加时间的统计；步骤统计;形成table供显示;
-# TODO 将steps递减和round弄成二维表；动态比较两种方法的情况； 
+# TODO 将steps递减和round弄成二维表；动态比较两种方法的情况；
 # TODO 如果能将时间显示在图表上就更好了；
+# TODO 添加多核计算(纯python无框架用多进程；如果是keras_tf等框架尝试多线程?了解一下keras_tf框架)
+# TODO 研究cartpole立杆子和开小车的GYM游戏
