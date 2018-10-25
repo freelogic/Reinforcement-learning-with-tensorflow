@@ -6,6 +6,12 @@ Run this program and to see how the agent will improve its strategy of finding t
 View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 """
 
+"""
+CC: 这个线性agent因为可以撰写环境反馈程序，所以简单的增加指数级的ACTION并更新环境反馈函数就行了；
+比如cartpole这个agent因为是通过物理环境反馈的小车速度和位置，杆子的角度和速度，所以无法更新环境反馈代码，所以需要直接设计一个外挂的指数级别的ACTION积累函数，其实就是长短记忆！！！
+看是否能利用神经网络引入指数效果？神经网络的框架还是不错的。
+"""
+
 import numpy as np
 import pandas as pd
 import time

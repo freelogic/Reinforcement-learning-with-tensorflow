@@ -6,9 +6,14 @@ Tensorflow: 1.0
 gym: 0.7.3
 """
 
+"""
+CC: 这个线性agent因为可以撰写环境反馈程序，所以简单的增加指数级的ACTION并更新环境反馈函数就行了；
+比如cartpole这个agent因为是通过物理环境反馈的小车速度和位置，杆子的角度和速度，所以无法更新环境反馈代码，所以需要直接设计一个外挂的指数级别的ACTION积累函数，其实就是长短记忆！！！
+看是否能利用神经网络引入指数效果？神经网络的框架还是不错的。
+"""
 
 import gym
-from RL_brain import DeepQNetwork
+from contents.PART_6_OpenAI_gym.RL_brain import DeepQNetwork
 
 env = gym.make('CartPole-v0')
 env = env.unwrapped
@@ -25,6 +30,8 @@ RL = DeepQNetwork(n_actions=env.action_space.n,
                   e_greedy_increment=0.001,)
 
 total_steps = 0
+print(env.action_space.n)
+print(env.observation_space.shape)
 
 
 for i_episode in range(100):
