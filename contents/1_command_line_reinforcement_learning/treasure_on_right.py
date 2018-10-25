@@ -5,6 +5,7 @@ Run this program and to see how the agent will improve its strategy of finding t
 
 View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 """
+import sys
 
 import numpy as np
 import pandas as pd
@@ -13,19 +14,19 @@ import time
 np.random.seed(2)  # reproducible
 
 
-N_STATES = 50   # the length of the 1 dimensional world
+N_STATES = 500   # the length of the 1 dimensional world
 END_POS = N_STATES - 1 # 总共有n_states个位置,所以编号从0到n_states-1，结束位置标志是n_states-1
 BEGIN_POS = 0 # 总共有n_states个位置,所以编号从0到n_states-1，开始位置标志是0
 #ACTIONS = ['left', 'right']     # available actions
 ACTIONS = ['l1', 'r1']     # available actions
-ACTIONS_EXP = ['l1', 'r1','l2', 'r2','l4', 'r4','l8', 'r8']     # available actions
+ACTIONS_EXP = ['l1', 'r1','l2', 'r2','l4', 'r4','l8', 'r8','l16', 'r16','l32', 'r32','l64', 'r64','l128', 'r128']     # available actions
 EPSILON = 0.9   # greedy police
 ALPHA = 0.1     # learning rate
 GAMMA = 0.9    # discount factor
 MAX_EPISODES = 60   # maximum episodes
 FRESH_TIME = 0.01    # fresh time for one move
 #steps_table = [] # save steps used every EPISODE
-display_steps = True # display steps in procedure, it make program VERY SLOW!
+display_steps = False # display steps in procedure, it make program VERY SLOW!
 
 
 def build_q_table(n_states, actions):
@@ -116,7 +117,9 @@ def rl(get_env_feedback_func,actions):
         step_counter = 0
         S = 0
         is_terminated = False
-        update_env(S, episode, step_counter)
+        #update_env(S, episode, step_counter)
+        if display_steps == False:
+            display_progress(int(episode / MAX_EPISODES * 100))  # 显示命令行进度
         while not is_terminated:
 
             A = choose_action(S, q_table,actions)
@@ -136,8 +139,16 @@ def rl(get_env_feedback_func,actions):
                 update_env(S, episode, step_counter+1)
             step_counter += 1
         steps_table.append(step_counter) # save steps used
+
     return q_table,steps_table
 
+def display_progress(percent):
+    bar_length=20 #20个字符宽度的进度条;
+    hashes = '>' * int(percent/100.0 * bar_length)
+    spaces = ' ' * (bar_length - len(hashes))
+    sys.stdout.write("\rPercent: [%s] %d%%"%(hashes + spaces, percent))
+    sys.stdout.flush()
+    #time.sleep(0.01)
 
 if __name__ == "__main__":
 
@@ -164,6 +175,6 @@ if __name__ == "__main__":
         print('\r\nQ-table:\n{0}'.format(q_table))
         print('\r\n')
 
-# TODO 增加时间的统计；
-# TODO 将steps递减和round弄成二维表；动态比较两种方法的情况；
+# TODO 增加时间的统计；步骤统计;形成table供显示;
+# TODO 将steps递减和round弄成二维表；动态比较两种方法的情况； 
 # TODO 如果能将时间显示在图表上就更好了；
