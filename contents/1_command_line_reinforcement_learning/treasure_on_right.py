@@ -16,6 +16,7 @@ CC: 这个线性agent因为可以撰写环境反馈程序，所以简单的增�
 import numpy as np
 import pandas as pd
 import time
+from contents.tool.utils import display_progress
 
 np.random.seed(2)  # reproducible
 
@@ -148,13 +149,7 @@ def rl(get_env_feedback_func,actions):
 
     return q_table,steps_table
 
-def display_progress(percent):
-    bar_length=20 #20个字符宽度的进度条;
-    hashes = '>' * int(percent/100.0 * bar_length)
-    spaces = ' ' * (bar_length - len(hashes))
-    sys.stdout.write("\rPercent: [%s] %d%%"%(hashes + spaces, percent))
-    sys.stdout.flush()
-    #time.sleep(0.01)
+
 
 if __name__ == "__main__":
 
