@@ -31,6 +31,8 @@ MAZE_W = 16
 class Maze(tk.Tk, object):
     def __init__(self):
         super(Maze, self).__init__()
+        self.DEF_AGENT_INIT_POS = [0,1]
+        self.ORIGIN = np.array([20, 20])  # 左上角方块（40x40）的中心坐标
         self.action_space = ['u1', 'd1', 'l1', 'r1']
         self.action_space_exp = ['u1', 'd1', 'l1', 'r1','u2', 'd2', 'l2', 'r2',
                                  'u4', 'd4', 'l4', 'r4','u8', 'd8', 'l8', 'r8']
@@ -41,24 +43,33 @@ class Maze(tk.Tk, object):
         self.heavens = []
         #self.boy
         self._build_maze()
+        self._agents = []
 
-    def _build_boy(self, scene_boy_list,origin):
-        # CREATE BOY #红色方块是旅行男孩
-        for boy in scene_boy_list:
-            center = origin + np.array([UNIT * boy[0], UNIT * boy[1]])
-            self.boy = self.canvas.create_rectangle(  # 方块是15+15=30像素见方的方块，比棋盘小）
+
+    def create_agent(self, color): #init_pos=[0,1]表示其实位置在第1行,第2列
+        # CREATE agent(旅行男孩)
+        center = self.ORIGIN + np.array([UNIT * self.DEF_AGENT_INIT_POS[0], UNIT * self.DEF_AGENT_INIT_POS[1]])
+        agent = self.canvas.create_rectangle(  # 方块是15+15=30像素见方的方块，比棋盘小）
+            center[0] - 15, center[1] - 15,
+            center[0] + 15, center[1] + 15,
+            fill=color)
+        self._agents.append(agent)
+        return agent
+
+    """
+    def _init_agent(self):
+        # init agents (at ORIGIN position)
+        for agent in self._agents:
+            agent = self.canvas.create_rectangle(  # 方块是15+15=30像素见方的方块，比棋盘小）
                 center[0] - 15, center[1] - 15,
                 center[0] + 15, center[1] + 15,
                 fill='red')
-
+    """
     def _build_scene(self, scene_list):
-        # create origin
-        origin = np.array([20, 20])  # 左上角方块（40x40）的中心坐标
-
         scene_hell_list = scene_list[0] #多个地狱
         # CREATE HELL #黑色方块是地狱
         for hell in scene_hell_list:
-            center = origin + np.array([UNIT * hell[0], UNIT * hell[1]])
+            center = self.ORIGIN + np.array([UNIT * hell[0], UNIT * hell[1]])
             self.one_hell = self.canvas.create_rectangle( # 方块是15+15=30像素见方的方块，比棋盘小）
                 center[0] - 15, center[1] - 15,
                 center[0] + 15, center[1] + 15,
@@ -68,15 +79,12 @@ class Maze(tk.Tk, object):
         scene_heaven_list = scene_list[1] #多个天堂
         # CREATE heaven #黄色圆是天堂
         for heaven in scene_heaven_list:
-            center = origin + np.array([UNIT * heaven[0], UNIT * heaven[1]])
+            center = self.ORIGIN + np.array([UNIT * heaven[0], UNIT * heaven[1]])
             self.one_heaven = self.canvas.create_oval( # 是15+15=30像素见方的圆，比棋盘标准grid小）
                 center[0] - 15, center[1] - 15,
                 center[0] + 15, center[1] + 15,
             fill='yellow')
             self.heavens.append(self.one_heaven)
-
-        scene_boy_list = scene_list[2]  # 探索男孩只能1个位置
-        self._build_boy(scene_boy_list,origin)
 
     def _build_maze(self):
         self.canvas = tk.Canvas(self, bg='white',
@@ -90,42 +98,11 @@ class Maze(tk.Tk, object):
         for r in range(0, MAZE_H * UNIT, UNIT):
             x0, y0, x1, y1 = 0, r, MAZE_H * UNIT, r
             self.canvas.create_line(x0, y0, x1, y1)
-        """
-        # create origin
-        origin = np.array([20, 20]) #左上角方块（40x40）的中心坐标
-
-        # hell  #黑色方块是地狱
-        hell1_center = origin + np.array([UNIT * 2, UNIT])
-        self.hell1 = self.canvas.create_rectangle( # 方块是15+15=30像素见方的方块，比棋盘小）
-            hell1_center[0] - 15, hell1_center[1] - 15,
-            hell1_center[0] + 15, hell1_center[1] + 15,
-            fill='black')
-        # hell
-        hell2_center = origin + np.array([UNIT, UNIT * 2])
-        self.hell2 = self.canvas.create_rectangle(
-            hell2_center[0] - 15, hell2_center[1] - 15,
-            hell2_center[0] + 15, hell2_center[1] + 15,
-            fill='black')
-
-        # create oval  # 黄色圆是天堂
-        oval_center = origin + UNIT * 2
-        self.oval = self.canvas.create_oval(
-            oval_center[0] - 15, oval_center[1] - 15,
-            oval_center[0] + 15, oval_center[1] + 15,
-            fill='yellow')
-
-        # create red rect  #红色是旅行者
-        self.rect = self.canvas.create_rectangle(
-            origin[0] - 15, origin[1] - 15,
-            origin[0] + 15, origin[1] + 15,
-            fill='red')
-
-        """
 
         # create scene  # 部署场景scene
         scene_hell_list = [[14,5],[13,6],[14,7],[10, 10], [9, 11], [11, 11]] #多个地狱
         scene_heaven_list = [[14,6], [10, 11]] #多个天堂
-        scene_boy_list = [[0, 1]] #探索男孩只能1个位置
+        scene_boy_list = [[0, 1],[1,0]] #多个探索男孩
         scene_list = [scene_hell_list,scene_heaven_list,scene_boy_list]
         self._build_scene(scene_list)
 
@@ -133,20 +110,25 @@ class Maze(tk.Tk, object):
         # pack all
         self.canvas.pack()
 
-    def reset(self):
+    def reset_agent(self, agent):
         self.update()
         time.sleep(0.05)
-        self.canvas.delete(self.boy)
-        origin = np.array([20, 20])
-        #self.rect = self.canvas.create_rectangle(
-        #    origin[0] - 15, origin[1] - 15,
-        #    origin[0] + 15, origin[1] + 15,
-        #    fill='red')
+        cur_pos = self.canvas.coords(agent)
+        self.canvas.move(agent, -cur_pos[0]+5, -cur_pos[1]+5)
+        return cur_pos
 
-        self._build_boy([[1,0]], origin)
+    def reset_all_agent(self):
+        self.update()
+        time.sleep(0.05)
+        for agent in self._agents:
+            #self.canvas.delete(agent)
+            cur_pos = self.canvas.coords(agent)
+            self.canvas.move(agent, -cur_pos[0]+5, -cur_pos[1]+5)
+        #self._init_agent()
+        return self.DEF_AGENT_INIT_POS
 
         # return observation
-        return self.canvas.coords(self.boy)
+        # return self.canvas.coords(self.boy)
 
     def coords_is_same(self, state, targets):
         for target in targets:
@@ -163,7 +145,7 @@ class Maze(tk.Tk, object):
             state = 'terminal'
         #elif state in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
         elif self.coords_is_same(state, self.hells):
-            reward = -1
+            reward = -2
             done = True
             state = 'terminal'
         else:
@@ -172,13 +154,13 @@ class Maze(tk.Tk, object):
 
         return state, reward, done
 
-    def handle_agent(self,action):
+    def handle_agent(self, action, agent):
         """
         self.action_space = ['u1', 'd1', 'l1', 'r1']
         self.action_space_exp = ['u1', 'd1', 'l1', 'r1','u2', 'd2', 'l2', 'r2',
                                  'u4', 'd4', 'l4', 'r4','u8', 'd8', 'l8', 'r8']
         """
-        s = self.canvas.coords(self.boy)
+        s = self.canvas.coords(agent)
         base_action = np.array([0, 0])
         if action[0] == 'u': #up
             step_nbr = int(action[1:])
@@ -197,30 +179,15 @@ class Maze(tk.Tk, object):
             if s[0] > UNIT * step_nbr:
                 base_action[0] -= UNIT * step_nbr
 
-        self.canvas.move(self.boy, base_action[0], base_action[1])  # move agent
-        """
-        s = self.canvas.coords(self.boy)
-        base_action = np.array([0, 0])
-        if action == 0:  # up
-            if s[1] > UNIT:
-                base_action[1] -= UNIT
-        elif action == 1:  # down
-            if s[1] < (MAZE_H - 1) * UNIT:
-                base_action[1] += UNIT
-        elif action == 2:  # right
-            if s[0] < (MAZE_W - 1) * UNIT:
-                base_action[0] += UNIT
-        elif action == 3:  # left
-            if s[0] > UNIT:
-                base_action[0] -= UNIT
+        self.canvas.move(agent, base_action[0], base_action[1])  # move agent
 
-        self.canvas.move(self.boy, base_action[0], base_action[1])  # move agent
-        """
-
-    def step(self, action):
-        self.handle_agent(action)
-        s_ = self.canvas.coords(self.boy)  # next state
+    def step(self, action, agent):
+        self.handle_agent(action, agent) # move agent
+        s_ = self.canvas.coords(agent)  # next state
         return self.handle_reward(s_)
+
+    def get_state(self, agent):
+        return self.canvas.coords(agent)  # current status
 
     def render(self):
         time.sleep(0.01)
