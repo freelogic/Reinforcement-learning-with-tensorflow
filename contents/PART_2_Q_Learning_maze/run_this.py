@@ -12,11 +12,15 @@ The RL is in RL_brain.py.
 View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 """
 
+
+
 """
+1. 尝试指数方法；速度非常快,对于大地图也收敛很快;
+
 TODO:
-1. TODO 尝试指数方法；
-2. TODO 让两个boy一起跑来比较； 最好能有动态的记分（-1，+1的总计分数，时间，episode，等等）
-3. TODO 增加难度，增加动态的布景，看两个boy的适应能力；
+2. TODO 让两个boy一起跑来比较； 
+3. TODO 最好能有动态的记分（-1，+1的总计分数，时间，episode，等等）
+4. TODO 增加难度，增加动态的布景，看两个boy的适应能力；
 
 """
 
@@ -64,8 +68,9 @@ def update():
 
 if __name__ == "__main__":
     env = Maze()
-    RL = QLearningTable(actions=list(range(env.n_actions)))
-
+    #RL = QLearningTable(actions=list(range(env.n_actions)))
+    #RL = QLearningTable(actions=env.action_space)
+    RL = QLearningTable(actions=env.action_space_exp)
     env.after(100, update)
     env.mainloop()
 

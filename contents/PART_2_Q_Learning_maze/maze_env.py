@@ -31,8 +31,10 @@ MAZE_W = 16
 class Maze(tk.Tk, object):
     def __init__(self):
         super(Maze, self).__init__()
-        self.action_space = ['u', 'd', 'l', 'r']
-        self.n_actions = len(self.action_space)
+        self.action_space = ['u1', 'd1', 'l1', 'r1']
+        self.action_space_exp = ['u1', 'd1', 'l1', 'r1','u2', 'd2', 'l2', 'r2',
+                                 'u4', 'd4', 'l4', 'r4','u8', 'd8', 'l8', 'r8']
+        #self.n_actions = len(self.action_space)
         self.title('maze')
         self.geometry('{0}x{1}'.format(MAZE_H * UNIT, MAZE_H * UNIT))
         self.hells = []
@@ -146,49 +148,79 @@ class Maze(tk.Tk, object):
         # return observation
         return self.canvas.coords(self.boy)
 
-    def check_coords(self, state, targets):
+    def coords_is_same(self, state, targets):
         for target in targets:
             if state == self.canvas.coords(target):
                 return True
         return False
 
-
-    def step(self, action):
-        s = self.canvas.coords(self.boy)
-        base_action = np.array([0, 0])
-        if action == 0:   # up
-            if s[1] > UNIT:
-                base_action[1] -= UNIT
-        elif action == 1:   # down
-            if s[1] < (MAZE_H - 1) * UNIT:
-                base_action[1] += UNIT
-        elif action == 2:   # right
-            if s[0] < (MAZE_W - 1) * UNIT:
-                base_action[0] += UNIT
-        elif action == 3:   # left
-            if s[0] > UNIT:
-                base_action[0] -= UNIT
-
-        self.canvas.move(self.boy, base_action[0], base_action[1])  # move agent
-
-        s_ = self.canvas.coords(self.boy)  # next state
-
+    def handle_reward(self,state):
         # reward function
-        #if s_ == self.canvas.coords(self.oval):
-        if self.check_coords(s_, self.heavens):
+        #if state_ == self.canvas.coords(self.oval):
+        if self.coords_is_same(state, self.heavens):
             reward = 1
             done = True
-            s_ = 'terminal'
-        #elif s_ in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
-        elif self.check_coords(s_,self.hells):
+            state = 'terminal'
+        #elif state in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
+        elif self.coords_is_same(state, self.hells):
             reward = -1
             done = True
-            s_ = 'terminal'
+            state = 'terminal'
         else:
             reward = 0
             done = False
 
-        return s_, reward, done
+        return state, reward, done
+
+    def handle_agent(self,action):
+        """
+        self.action_space = ['u1', 'd1', 'l1', 'r1']
+        self.action_space_exp = ['u1', 'd1', 'l1', 'r1','u2', 'd2', 'l2', 'r2',
+                                 'u4', 'd4', 'l4', 'r4','u8', 'd8', 'l8', 'r8']
+        """
+        s = self.canvas.coords(self.boy)
+        base_action = np.array([0, 0])
+        if action[0] == 'u': #up
+            step_nbr = int(action[1:])
+            if s[1] > UNIT * step_nbr:
+                base_action[1] -= UNIT * step_nbr
+        elif action[0] == 'd': #down
+            step_nbr = int(action[1:])
+            if s[1] < (MAZE_H - 1 - step_nbr) * UNIT:
+                base_action[1] += UNIT * step_nbr
+        elif action[0] == 'r': #right
+            step_nbr = int(action[1:])
+            if s[0] < (MAZE_W - 1 - step_nbr) * UNIT:
+                base_action[0] += UNIT * step_nbr
+        elif action[0] == 'l': #left
+            step_nbr = int(action[1:])
+            if s[0] > UNIT * step_nbr:
+                base_action[0] -= UNIT * step_nbr
+
+        self.canvas.move(self.boy, base_action[0], base_action[1])  # move agent
+        """
+        s = self.canvas.coords(self.boy)
+        base_action = np.array([0, 0])
+        if action == 0:  # up
+            if s[1] > UNIT:
+                base_action[1] -= UNIT
+        elif action == 1:  # down
+            if s[1] < (MAZE_H - 1) * UNIT:
+                base_action[1] += UNIT
+        elif action == 2:  # right
+            if s[0] < (MAZE_W - 1) * UNIT:
+                base_action[0] += UNIT
+        elif action == 3:  # left
+            if s[0] > UNIT:
+                base_action[0] -= UNIT
+
+        self.canvas.move(self.boy, base_action[0], base_action[1])  # move agent
+        """
+
+    def step(self, action):
+        self.handle_agent(action)
+        s_ = self.canvas.coords(self.boy)  # next state
+        return self.handle_reward(s_)
 
     def render(self):
         time.sleep(0.01)
