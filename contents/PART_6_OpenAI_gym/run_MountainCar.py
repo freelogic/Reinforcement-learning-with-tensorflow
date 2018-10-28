@@ -8,7 +8,7 @@ gym: 0.8.0
 
 
 import gym
-from RL_brain import DeepQNetwork
+from contents.PART_6_OpenAI_gym.RL_brain import DeepQNetwork
 
 env = gym.make('MountainCar-v0')
 env = env.unwrapped
